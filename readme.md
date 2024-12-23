@@ -1,7 +1,7 @@
 # Spring Boot Authentication Template
 
 ## Descrição
-Este projeto é um template de autenticação para APIs REST desenvolvidas com Spring Boot. Ele fornece uma implementação robusta de segurança, permitindo que os desenvolvedores foquem exclusivamente nas regras de negócio sem se preocupar com a configuração de segurança. O template inclui:
+Este projeto é um template de autenticação para APIs REST desenvolvidas com Spring Boot. O template inclui:
 
 - CRUD de usuário;
 - Validação de e-mail ao criar conta;
@@ -23,7 +23,7 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
    ```
 2. Configure o arquivo `application.properties` com as credenciais do seu banco de dados:
    ```properties
-   spring.application.name=sua_aplicacao
+    spring.application.name=sua_aplicacao
     spring.datasource.url=jdbc:postgresql://localhost:5432/sua_base_de_dados
     spring.datasource.username=seu_usuario
     spring.datasource.password=sua_senha
