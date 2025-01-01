@@ -19,7 +19,7 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
 
 1. Clone este repositório:
    ```bash
-   git clone https://github.com/iZezito/spring-auth-template.git
+   git clone https://github.com/iZezito/spring-auth.git
    ```
 2. Configure o arquivo `application.properties` com as credenciais do seu banco de dados:
    ```properties
