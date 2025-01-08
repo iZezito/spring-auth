@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,40 +30,50 @@ public class SecurityConfigurations {
     private SecurityFilter securityFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.csrf().disable()
-                .cors().and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().authorizeHttpRequests()
-                .requestMatchers("/ws-chat/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/login", "/usuarios", "/usuarios/matricula", "/usuarios/password-reset", "/usuarios/password-reset-tk", "/login/validate-2fa").permitAll()
-                .requestMatchers(HttpMethod.GET, "/usuarios/login/{login}", "/usuarios/verify-email").permitAll()
-                .requestMatchers(HttpMethod.GET, "/usuarios/email/{email}").permitAll()
-                .requestMatchers(HttpMethod.GET, "/resources/image/{filename:.+}").permitAll()
-                .requestMatchers(HttpMethod.GET, "/videos/teste").permitAll()
-                .anyRequest().authenticated()
-                .and().addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling()
-                .authenticationEntryPoint((request, response, authException) -> {
-                    if (response.isCommitted()) {
-                        return;
-                    }
-                    if (authException != null) {
-                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                        response.setContentType("application/json");
-                        response.getWriter().write("{\"message\": \"Não autorizado - Token ausente ou inválido\"}");
-                    } else {
-                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        response.setContentType("application/json");
-                        response.getWriter().write("{\"message\": \"Recurso não encontrado\"}");
-                    }
-                })
-                .accessDeniedHandler((request, response, accessDeniedException) -> {
-                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"message\": \"Acesso negado - Sem permissão para este recurso\"}");
-                })
-                .and().build();
+    public SecurityFilterChain securityFilterChain(HttpSecurity http ) throws Exception {
+        return http
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> {})
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/ws-chat/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,
+                                "/login",
+                                "/usuarios",
+                                "/usuarios/matricula",
+                                "/usuarios/password-reset",
+                                "/usuarios/password-reset-tk",
+                                "/login/validate-2fa").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/usuarios/login/{login}",
+                                "/usuarios/verify-email",
+                                "/usuarios/email/{email}",
+                                "/resources/image/{filename:.+}",
+                                "/videos/teste").permitAll()
+                        .anyRequest().authenticated())
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            if (response.isCommitted()) {
+                                return;
+                            }
+                            if (authException != null) {
+                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                response.setContentType("application/json");
+                                response.getWriter().write("{\"message\": \"Não autorizado - Token ausente ou inválido\"}");
+                            } else {
+                                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                                response.setContentType("application/json");
+                                response.getWriter().write("{\"message\": \"Recurso não encontrado\"}");
+                            }
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"message\": \"Acesso negado - Sem permissão para este recurso\"}");
+                        }))
+                .build();
     }
 
     @Bean
