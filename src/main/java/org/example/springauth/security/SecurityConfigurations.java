@@ -24,14 +24,17 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfigurations {
+
     @Autowired
     private SecurityFilter securityFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.csrf().disable().cors().and()
+        return http.csrf().disable()
+                .cors().and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().authorizeHttpRequests()
+                .requestMatchers("/ws-chat/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/login", "/usuarios", "/usuarios/matricula", "/usuarios/password-reset", "/usuarios/password-reset-tk", "/login/validate-2fa").permitAll()
                 .requestMatchers(HttpMethod.GET, "/usuarios/login/{login}", "/usuarios/verify-email").permitAll()
                 .requestMatchers(HttpMethod.GET, "/usuarios/email/{email}").permitAll()
@@ -41,23 +44,31 @@ public class SecurityConfigurations {
                 .and().addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
                 .authenticationEntryPoint((request, response, authException) -> {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"message\": \"Não autorizado - Token ausente ou inválido\"}");
+                    if (response.isCommitted()) {
+                        return;
+                    }
+                    if (authException != null) {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"message\": \"Não autorizado - Token ausente ou inválido\"}");
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"message\": \"Recurso não encontrado\"}");
+                    }
                 })
                 .accessDeniedHandler((request, response, accessDeniedException) -> {
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                     response.setContentType("application/json");
                     response.getWriter().write("{\"message\": \"Acesso negado - Sem permissão para este recurso\"}");
                 })
-                .and()
-                .build();
+                .and().build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://10.77.115.210:5173", "http://localhost:3000", "https://edu-simulator.vercel.app")); // Permitir todas as origens
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://10.77.115.210:5173", "http://localhost:3000", "https://edu-simulator.vercel.app"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
@@ -76,6 +87,4 @@ public class SecurityConfigurations {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-
 }
