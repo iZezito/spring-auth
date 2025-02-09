@@ -44,35 +44,21 @@ public class AutenticacaoController {
             }
 
             if (usuario.isTwoFactorAuthenticationEnabled()) {
-                twoFactorAuthService.generateAndSend2FACode(usuario);
-                return ResponseEntity.accepted().body("Código de autenticação enviado para o e-mail.");
-            } else {
-                String tokenJWT = tokenService.gerarToken(usuario);
-                return ResponseEntity.ok(new DadosTokenJWT(tokenJWT, usuario.getNome()));
+                if (dados.codigo() == null || dados.codigo().isEmpty()) {
+                    twoFactorAuthService.generateAndSend2FACode(usuario);
+                    return ResponseEntity.accepted().body("Código de autenticação enviado para o e-mail.");
+                }
+
+                if (!twoFactorAuthService.validate2FACode(usuario, dados.codigo())) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Código 2FA inválido ou expirado.");
+                }
             }
+
+            String tokenJWT = tokenService.gerarToken(usuario);
+            return ResponseEntity.ok(new DadosTokenJWT(tokenJWT, usuario.getNome()));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body("Credenciais inválidas. Por favor, verifique seu e-mail e senha e tente novamente.");
-        }
-    }
-
-    @PostMapping("/validate-2fa")
-    public ResponseEntity<?> validateTwoFactor(@RequestParam String username, @RequestParam String code) {
-        try {
-            Optional<Usuario> userOpt = Optional.ofNullable(usuarioService.findByLogin(username));
-            if (userOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
-            }
-            Usuario usuario = userOpt.get();
-            if (twoFactorAuthService.validate2FACode(usuario, code)) {
-                String tokenJWT = tokenService.gerarToken(usuario);
-                return ResponseEntity.ok(new DadosTokenJWT(tokenJWT, usuario.getNome()));
-            } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Código 2FA inválido ou expirado.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao validar 2FA.");
         }
     }
 

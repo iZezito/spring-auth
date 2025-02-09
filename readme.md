@@ -164,17 +164,20 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
 **Descrição:** Autentica o usuário e retorna um token JWT ou solicita autenticação 2FA, se habilitado.
 
 - **URL:** `/login`
+
 - **Método:** `POST`
+
 - **Corpo da Requisição:**
 
   ```json
   {
     "login": "john.doe@example.com",
-    "senha": "senha123"
+    "senha": "senha123",
+    "codigo": "123456" // Opcional, necessário apenas se 2FA estiver habilitado
   }
   ```
 
-- **Resposta de Sucesso (Autenticação com 2FA habilitada):**
+- **Resposta de Sucesso (Autenticação com 2FA habilitada e código ausente):**
 
   ```json
   {
@@ -182,7 +185,7 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
   }
   ```
 
-- **Resposta de Sucesso (Sem 2FA):**
+- **Resposta de Sucesso (Autenticação com 2FA validada ou sem 2FA):**
 
   ```json
   {
@@ -191,7 +194,7 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
   }
   ```
 
-    - **Resposta de Erro (Email não validado):**
+- **Resposta de Erro (Email não validado):**
 
   ```json
   {
@@ -199,44 +202,15 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
   }
   ```
 
-    - **Resposta de Erro (Credenciais inválidas):**
+- **Resposta de Erro (Credenciais inválidas):**
 
   ```json
   {
-    "message": "Credenciais inválidas. Por favor, verifique seu e-mail e senha e tente novamente."
+    "message": "Credenciais inválidas. Por favor, verifique seu e-mail, senha e código 2FA, se necessário."
   }
   ```
 
-### 6. Validação do Código 2FA
-
-**Descrição:** Valida o código de autenticação de dois fatores e retorna um token JWT.
-
-- **URL:** `/login/validate-2fa`
-- **Método:** `POST`
-- **Parâmetros da Requisição:**
-
-    - `username`: E-mail do usuário.
-    - `code`: Código 2FA enviado para o e-mail.
-
-- **Exemplo de Requisição:**
-
-  ```json
-  {
-    "username": "john.doe@example.com",
-    "code": "123456"
-  }
-  ```
-
-- **Resposta de Sucesso:**
-
-  ```json
-  {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "nome": "John Doe"
-  }
-  ```
-
-    - **Resposta de Erro (Código inválido ou expirado):**
+- **Resposta de Erro (Código 2FA inválido ou expirado):**
 
   ```json
   {
