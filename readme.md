@@ -206,7 +206,7 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
 
   ```json
   {
-    "message": "Credenciais inválidas. Por favor, verifique seu e-mail, senha e código 2FA, se necessário."
+    "message": "Credenciais inválidas. Por favor, verifique seu e-mail e senha e tente novamente."
   }
   ```
 
@@ -251,4 +251,4 @@ public class Usuario {
 - JWT.
 
 ## Licença
-Este projeto está licenciado sob a [Lincença Emersoniana](LICENSE).
+Este projeto está licenciado sob a [Licença Emersoniana](LICENSE).
