@@ -1,6 +1,7 @@
 package org.example.springauth.usuario;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -24,16 +25,33 @@ public class Usuario implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotBlank
     private String nome;
+
     @NotBlank
     @Column(unique = true)
     private String email;
-    @NotBlank
-    @Size(min = 6)
+
     private String password;
+
+    private String oauth2Provider;
 
     private boolean emailVerified = false;
     private boolean twoFactorAuthenticationEnabled = false;
+
+    // Validação condicional
+    @AssertTrue(message = "A senha é obrigatória e deve ter pelo menos 6 caracteres")
+    public boolean isPasswordValid() {
+        if (isOAuth2User()) {
+            return true;
+        }
+        return password != null && !password.isBlank() && password.length() >= 6;
+    }
+
+    public boolean isOAuth2User() {
+        return oauth2Provider != null && !oauth2Provider.isEmpty();
+    }
     
 
     @Override

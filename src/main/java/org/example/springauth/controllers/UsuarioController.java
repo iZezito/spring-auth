@@ -40,7 +40,7 @@ public class UsuarioController {
         Usuario user = service.save(usuario);
         StringBuilder builder = new StringBuilder();
         String token = service.createVerificatioEmailToken(user);
-        emailService.sendEmail(user.getEmail(), "Verificação de Conta", builder.append("Clique no link para validar seu email: ").append("{link da sua aplicação}/validate-email?token=").append(token).toString());
+        emailService.sendEmail(user.getEmail(), "Verificação de Conta", builder.append("Clique no link para validar seu email: ").append("http://localhost:5173/validate-email?token=").append(token).toString());
         return ResponseEntity.ok("Usuário registrado. Verifique seu e-mail para ativação.");
     }
 
@@ -106,7 +106,7 @@ public class UsuarioController {
         StringBuilder builder = new StringBuilder();
         Usuario user = userOpt.get();
         String token = service.createPasswordResetToken(user);
-        emailService.sendEmail(user.getEmail(), "Redefinição de senha", builder.append("Clique no link para redefinir sua senha: ").append("{link da sua aplicação}?token=").append(token).toString());
+        emailService.sendEmail(user.getEmail(), "Redefinição de senha", builder.append("Clique no link para redefinir sua senha: ").append("http://localhost:5173/reset-password?token=").append(token).toString());
 
         return ResponseEntity.ok("E-mail de recuperação de senha enviado.");
     }
