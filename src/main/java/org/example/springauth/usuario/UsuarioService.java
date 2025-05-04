@@ -76,12 +76,12 @@ public class UsuarioService {
         return Optional.ofNullable((Usuario) repository.findByEmail(email));
     }
 
-    public Usuario criarNovoUsuario(String email, String nome) {
+    public Usuario criarNovoUsuario(String email, String nome, String provider) {
         Usuario usuario = new Usuario();
         usuario.setEmail(email);
         usuario.setNome(nome);
         usuario.setEmailVerified(true);
-        usuario.setOauth2Provider("GOOGLE");
+        usuario.setOauth2Provider(provider);
         return repository.save(usuario);
     }
 }

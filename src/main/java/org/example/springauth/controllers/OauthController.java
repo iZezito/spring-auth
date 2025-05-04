@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/oauth2/login")
-@Slf4j  // Adicione esta anotação se quiser usar o logger
-public class GoogleOAuthController {
+@Slf4j
+public class OauthController {
     @Autowired
     private TokenService tokenService;
 
@@ -26,39 +26,49 @@ public class GoogleOAuthController {
 
     @GetMapping("/success")
     public ResponseEntity<?> loginSuccess(Authentication authentication) {
-        log.info("Recebendo requisição de login success"); // Log para debug
-
-        if (authentication == null) {
-            log.error("Authentication é null");  // Log para debug
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro na autenticação com o Google");
+        if (authentication == null || !(authentication instanceof OAuth2AuthenticationToken oauth2Auth)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro na autenticação OAuth2");
         }
 
         try {
-            OAuth2AuthenticationToken oauth2Auth = (OAuth2AuthenticationToken) authentication;
             OAuth2User oauth2User = oauth2Auth.getPrincipal();
-
-            log.info("Usuário OAuth2 autenticado: {}", oauth2User.getName());  // Log para debug
+            String registrationId = oauth2Auth.getAuthorizedClientRegistrationId();
 
             String email = oauth2User.getAttribute("email");
-            String nome = oauth2User.getAttribute("name");
+            String login = oauth2User.getAttribute("login");
+            String name = oauth2User.getAttribute("name");
 
-            if (email == null) {
-                log.error("Email não encontrado nos atributos do OAuth2User");  // Log para debug
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email não encontrado");
+
+            String emailFinal;
+            String nomeFinal;
+
+            if ("github".equals(registrationId) && email == null) {
+                emailFinal = login + "@github.com";
+                nomeFinal = (name != null) ? name : login;
+            } else {
+                emailFinal = email;
+                nomeFinal = name;
             }
 
-            Usuario usuario = usuarioService.findByEmail(email)
-                    .orElseGet(() -> usuarioService.criarNovoUsuario(email, nome));
+            if (emailFinal == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email não encontrado no OAuth2");
+            }
+
+            final String finalEmail = emailFinal;
+            final String finalNome = nomeFinal;
+
+            Usuario usuario = usuarioService.findByEmail(finalEmail)
+                    .orElseGet(() -> usuarioService.criarNovoUsuario(finalEmail, finalNome, registrationId));
 
             String tokenJWT = tokenService.gerarToken(usuario);
 
-            // Redireciona para o frontend com o token JWT
+            String redirectUrl = "http://localhost:4200/oauth-success?token=" + tokenJWT;
+
             return ResponseEntity.status(HttpStatus.FOUND)
-                    .header("Location", "http://localhost:5173/oauth-success?token=" + tokenJWT)
+                    .header("Location", redirectUrl)
                     .build();
 
         } catch (Exception e) {
-            log.error("Erro ao processar autenticação OAuth2", e);  // Log para debug
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erro ao processar autenticação: " + e.getMessage());
         }
