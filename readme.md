@@ -7,13 +7,15 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
 - Validação de e-mail ao criar conta;
 - Recuperação de senha;
 - Autenticação de dois fatores (2FA).
+- Login via google
+- Login via github
 
 ## Requisitos
 
 - Java 17 ou superior;
 - Spring Boot 3.0 ou superior;
 - Banco de dados PostgreSQL;
-- Maven ou Gradle.
+- Maven.
 
 ## Instalação
 
@@ -54,8 +56,20 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
    ```
    > **Nota:** Substitua os valores acima pelas suas configurações reais. Considere usar variáveis de ambiente para as credenciais sensíveis.
 
+5. Configure as credencias de Oauth no arquivo `application.properties`:
+   ```properties
+   spring.security.oauth2.client.registration.google.client-id=528271025953-ncp9vd4acai7aafg8n37is2kik39si41.apps.googleusercontent.com
+   spring.security.oauth2.client.registration.google.client-secret=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
+   spring.security.oauth2.client.registration.google.scope=email,profile
 
-5. Execute a aplicação:
+
+   spring.security.oauth2.client.registration.github.client-id=Ov23li2Q3BqI8abhju3P
+   spring.security.oauth2.client.registration.github.client-secret=43daa1478082746160ef03e519cc5e8b33158b04
+   spring.security.oauth2.client.registration.github.scope=user:email
+   ```
+   > **Nota:** Substitua os valores acima pelas suas configurações reais. Considere usar variáveis de ambiente para as credenciais sensíveis.
+   
+7. Execute a aplicação:
    ```bash
    mvn spring-boot:run
    ```
@@ -218,6 +232,46 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
   }
   ```
 
+### 6. Login com Google e GitHub (OAuth2)
+
+**Descrição:** Permite autenticação via contas do Google ou GitHub.
+
+- **Início da Autenticação:**
+Para iniciar o login, redirecione o usuário para a seguinte URL, substituindo `{provider}` por `google` ou `github`:
+
+```bash
+GET /oauth2/authorization/{provider}
+
+```
+
+**Exemplo:**
+
+```bash
+/oauth2/authorization/google
+/oauth2/authorization/github
+```
+Isso abrirá a tela de login do provedor (Google ou GitHub).
+
+- **Callback de Sucesso:**
+```bash
+GET /oauth2/login/success
+```
+
+Esse endpoint:
+
+- Extrai as informações da conta do usuário;
+- Cria um novo usuário no sistema (caso ainda não exista);
+- Gera um JWT;
+- Redireciona para o frontend com o token JWT anexado à URL.
+
+**Redirecionamento para o Frontend:**
+
+O usuário será redirecionado para:
+```bash
+http://localhost:4200/oauth-success?token={jwt}
+```
+> Substitua localhost:4200 pelo domínio do seu frontend, se necessário.
+
 ## Estrutura da Entidade `Usuario`
 
 ```java
@@ -230,6 +284,7 @@ public class Usuario {
     private String nome;
     private String email;
     private String password;
+    private String oauth2Provider;
     private boolean emailVerified;
     private boolean twoFactorAuthenticationEnabled;
     // Getters, Setters e outros métodos omitidos
@@ -240,6 +295,7 @@ public class Usuario {
 
 - Spring Boot 3.0;
 - Spring Security;
+- Spring Security Oauth2 Client;
 - Spring Boot DevTools;
 - Lombok;
 - Spring Web;
@@ -247,7 +303,7 @@ public class Usuario {
 - Spring Data JPA;
 - PostgreSQL Driver;
 - Validation;
-- Java Mail Sender;
+- Spring Mail;
 - JWT.
 
 ## Licença
