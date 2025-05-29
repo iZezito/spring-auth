@@ -40,7 +40,6 @@ public class Usuario implements UserDetails {
     private boolean emailVerified = false;
     private boolean twoFactorAuthenticationEnabled = false;
 
-    // Validação condicional
     @AssertTrue(message = "A senha é obrigatória e deve ter pelo menos 6 caracteres")
     public boolean isPasswordValid() {
         if (isOAuth2User()) {

@@ -62,7 +62,7 @@ public class OauthController {
 
             String tokenJWT = tokenService.gerarToken(usuario);
 
-            String redirectUrl = "http://localhost:4200/oauth-success?token=" + tokenJWT;
+            String redirectUrl = "http://localhost:3000/oauth-success?token=" + tokenJWT;
 
             return ResponseEntity.status(HttpStatus.FOUND)
                     .header("Location", redirectUrl)

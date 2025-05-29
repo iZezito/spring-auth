@@ -37,6 +37,7 @@ public class UsuarioController {
 
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody @Valid Usuario usuario){
+        System.out.println("Senha:" + usuario.getPassword());
         Usuario user = service.save(usuario);
         StringBuilder builder = new StringBuilder();
         String token = service.createVerificatioEmailToken(user);
@@ -100,30 +101,35 @@ public class UsuarioController {
     @PostMapping("/password-reset-tk")
     public ResponseEntity<String> requestPasswordReset(@RequestParam String email) {
         Optional<Usuario> userOpt = Optional.ofNullable(service.findByLogin(email));
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
-        }
-        StringBuilder builder = new StringBuilder();
-        Usuario user = userOpt.get();
-        String token = service.createPasswordResetToken(user);
-        emailService.sendEmail(user.getEmail(), "Redefinição de senha", builder.append("Clique no link para redefinir sua senha: ").append("http://localhost:5173/reset-password?token=").append(token).toString());
-
-        return ResponseEntity.ok("E-mail de recuperação de senha enviado.");
+        userOpt.ifPresent(user -> {
+            StringBuilder builder = new StringBuilder();
+            String token = service.createPasswordResetToken(user);
+            emailService.sendEmail(user.getEmail(), "Redefinição de senha", builder.append("Clique no link para redefinir sua senha: ").append("http://localhost:5173/reset-password?token=").append(token).toString());
+        });
+        return ResponseEntity.ok("Se existir uma conta com esse e-mail cadastrado, ela receberá um e-mail com instruções para redefinição de senha.");
     }
 
     @PostMapping("/password-reset")
     public ResponseEntity<String> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
         Optional<PasswordResetToken> resetTokenOpt = tokenRepository.findByToken(token);
-        if (resetTokenOpt.isEmpty() || resetTokenOpt.get().isExpired()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido ou expirado.");
+
+        if (resetTokenOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Token não encontrado.");
         }
 
-        Usuario user = resetTokenOpt.get().getUser();
+        PasswordResetToken resetToken = resetTokenOpt.get();
+
+        if (resetToken.isExpired()) {
+            return ResponseEntity.status(HttpStatus.GONE).body("Token expirado.");
+        }
+
+        Usuario user = resetToken.getUser();
         service.updatePassword(user, newPassword);
-        tokenRepository.delete(resetTokenOpt.get());
+        tokenRepository.delete(resetToken);
 
         return ResponseEntity.ok("Senha alterada com sucesso.");
     }
+
 
 
 

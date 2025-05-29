@@ -1,6 +1,7 @@
 package org.example.springauth.controllers;
 
 
+import org.example.springauth.model.MessageInfo;
 import org.example.springauth.security.DadosTokenJWT;
 import org.example.springauth.security.TokenService;
 import org.example.springauth.service.TwoFactorAuthService;
@@ -40,17 +41,17 @@ public class AutenticacaoController {
             var usuario = (Usuario) authentication.getPrincipal();
 
             if (!usuario.isEmailVerified()) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("E-mail não validado, cheque sua caixa de entrada!");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageInfo("E-mail não validado, cheque sua caixa de entrada!"));
             }
 
             if (usuario.isTwoFactorAuthenticationEnabled()) {
                 if (dados.codigo() == null || dados.codigo().isEmpty()) {
                     twoFactorAuthService.generateAndSend2FACode(usuario);
-                    return ResponseEntity.accepted().body("Código de autenticação enviado para o e-mail.");
+                    return ResponseEntity.accepted().body(new MessageInfo("Código de autenticação enviado para o e-mail."));
                 }
 
                 if (!twoFactorAuthService.validate2FACode(usuario, dados.codigo())) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Código 2FA inválido ou expirado.");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageInfo("Código 2FA inválido ou expirado."));
                 }
             }
 
