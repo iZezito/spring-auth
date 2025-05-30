@@ -1,9 +1,8 @@
-package org.example.springauth.usuario;
+package org.example.springauth.applicationUser;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,20 +13,19 @@ import java.util.List;
 
 @Table(name = "usuarios")
 @Entity(name = "Usuario")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 @ToString
-public class Usuario implements UserDetails {
+public class ApplicationUser implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
-    private String nome;
+    private String name;
 
     @NotBlank
     @Column(unique = true)
@@ -41,7 +39,7 @@ public class Usuario implements UserDetails {
     private boolean twoFactorAuthenticationEnabled = false;
 
     // Validação condicional
-    @AssertTrue(message = "A senha é obrigatória e deve ter pelo menos 6 caracteres")
+    @AssertTrue(message = "Password is mandatory and must be at least 6 characters long.")
     public boolean isPasswordValid() {
         if (isOAuth2User()) {
             return true;

@@ -2,8 +2,8 @@ package org.example.springauth.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.springauth.security.TokenService;
-import org.example.springauth.usuario.Usuario;
-import org.example.springauth.usuario.UsuarioService;
+import org.example.springauth.applicationUser.ApplicationUser;
+import org.example.springauth.applicationUser.ApplicationUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +22,12 @@ public class OauthController {
     private TokenService tokenService;
 
     @Autowired
-    private UsuarioService usuarioService;
+    private ApplicationUserService applicationUserService;
 
     @GetMapping("/success")
     public ResponseEntity<?> loginSuccess(Authentication authentication) {
-        if (authentication == null || !(authentication instanceof OAuth2AuthenticationToken oauth2Auth)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro na autenticação OAuth2");
+        if (!(authentication instanceof OAuth2AuthenticationToken oauth2Auth)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("OAuth2 authentication error");
         }
 
         try {
@@ -37,7 +37,6 @@ public class OauthController {
             String email = oauth2User.getAttribute("email");
             String login = oauth2User.getAttribute("login");
             String name = oauth2User.getAttribute("name");
-
 
             String emailFinal;
             String nomeFinal;
@@ -55,12 +54,12 @@ public class OauthController {
             }
 
             final String finalEmail = emailFinal;
-            final String finalNome = nomeFinal;
+            final String finalName = nomeFinal;
 
-            Usuario usuario = usuarioService.findByEmail(finalEmail)
-                    .orElseGet(() -> usuarioService.criarNovoUsuario(finalEmail, finalNome, registrationId));
+            ApplicationUser applicationUser = applicationUserService.findByEmail(finalEmail)
+                    .orElseGet(() -> applicationUserService.createNewApplicationUser(finalEmail, finalName, registrationId));
 
-            String tokenJWT = tokenService.gerarToken(usuario);
+            String tokenJWT = tokenService.generateToken(applicationUser);
 
             String redirectUrl = "http://localhost:4200/oauth-success?token=" + tokenJWT;
 

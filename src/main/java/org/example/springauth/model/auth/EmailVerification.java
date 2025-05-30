@@ -1,6 +1,6 @@
 package org.example.springauth.model.auth;
 
-import org.example.springauth.usuario.Usuario;
+import org.example.springauth.applicationUser.ApplicationUser;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,7 +21,7 @@ public class EmailVerification {
 
     @OneToOne
     @JoinColumn(name = "usuario_id", referencedColumnName = "id", nullable = false)
-    private Usuario usuario;
+    private ApplicationUser applicationUser;
 
     @Column(nullable = false, unique = true)
     private String verificationToken;

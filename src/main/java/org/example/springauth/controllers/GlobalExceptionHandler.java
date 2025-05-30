@@ -21,19 +21,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<String> handleNotFound(NoHandlerFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("{\"message\": \"Recurso não encontrado\"}");
+                .body("{\"message\": \"Resource not found\"}");
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("{\"message\": \"Erro de integridade de dados - " + ex.getLocalizedMessage() + "\"}");
+                .body("{\"message\": \"Data integrity error - " + ex.getLocalizedMessage() + "\"}");
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("{\"message\": \"Erro interno do servidor - " + ex.getMessage() + "\"}");
+                .body("{\"message\": \"Internal server error - " + ex.getMessage() + "\"}");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

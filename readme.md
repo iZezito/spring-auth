@@ -80,7 +80,7 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
 
 **Descrição:** Registra um novo usuário e envia um e-mail de confirmação.
 
-- **URL:** `/usuarios`
+- **URL:** `/applicationUsers`
 - **Método:** `POST`
 - **Corpo da Requisição:**
 
@@ -104,7 +104,7 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
 
 **Descrição:** Confirma o e-mail do usuário utilizando um token enviado.
 
-- **URL:** `/usuarios/verify-email`
+- **URL:** `/applicationUsers/verify-email`
 - **Método:** `GET`
 - **Parâmetros de Consulta:**
 
@@ -113,7 +113,7 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
 - **Exemplo de Requisição:**
 
   ```
-  GET /usuarios/verify-email?token=abc123xyz
+  GET /applicationUsers/verify-email?token=abc123xyz
   ```
 
 - **Resposta de Sucesso:**
@@ -128,7 +128,7 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
 
 **Descrição:** Envia um e-mail com o link para redefinição de senha.
 
-- **URL:** `/usuarios/password-reset-tk`
+- **URL:** `/applicationUsers/password-reset-tk`
 - **Método:** `POST`
 - **Parâmetros de Consulta:**
 
@@ -137,7 +137,7 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
 **Exemplo de Requisição:**
 
   ```
-  POST /usuarios/password-reset-tk?email=example@gmail.com
+  POST /applicationUsers/password-reset-tk?email=example@gmail.com
   ```
 
 - **Resposta de Sucesso:**
@@ -152,7 +152,7 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
 
 **Descrição:** Redefine a senha do usuário utilizando um token enviado por e-mail.
 
-- **URL:** `/usuarios/password-reset`
+- **URL:** `/applicationUsers/password-reset`
 - **Método:** `POST`
 - **Parâmetros de Consulta:**
 
@@ -162,7 +162,7 @@ Este projeto é um template de autenticação para APIs REST desenvolvidas com S
 **Exemplo de Requisição:**
 
   ```
-  POST /usuarios/password-reset?token=783259cf-44d4-4dff-8a3e-f45a89dd2cba&newPassword=1111111
+  POST /applicationUsers/password-reset?token=783259cf-44d4-4dff-8a3e-f45a89dd2cba&newPassword=1111111
   ```
 
 - **Resposta de Sucesso:**
@@ -276,7 +276,7 @@ http://localhost:4200/oauth-success?token={jwt}
 
 ```java
 @Entity
-@Table(name = "usuarios")
+@Table(name = "applicationUsers")
 public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

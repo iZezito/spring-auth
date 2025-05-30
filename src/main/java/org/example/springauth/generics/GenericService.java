@@ -7,7 +7,6 @@ import java.util.Optional;
 
 
 public abstract class GenericService<T>{
-    @Autowired
     protected GenericRepository<T> repository;
 
     public T save(T t){
@@ -27,10 +26,7 @@ public abstract class GenericService<T>{
     }
 
     public T getById(Long id){
-        Optional<T> objeto = repository.findById(id);
-        return objeto.orElse(null);
-
+        Optional<T> object = repository.findById(id);
+        return object.orElse(null);
     }
-
-
 }

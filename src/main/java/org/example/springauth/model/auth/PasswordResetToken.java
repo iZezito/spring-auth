@@ -1,6 +1,6 @@
 package org.example.springauth.model.auth;
 
-import org.example.springauth.usuario.Usuario;
+import org.example.springauth.applicationUser.ApplicationUser;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,11 +22,11 @@ public class PasswordResetToken {
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private Usuario user;
+    private ApplicationUser user;
 
     private LocalDateTime expiryDate;
 
-    public PasswordResetToken(String token, Usuario user) {
+    public PasswordResetToken(String token, ApplicationUser user) {
         this.token = token;
         this.user = user;
         this.expiryDate = LocalDateTime.now().plusHours(1);

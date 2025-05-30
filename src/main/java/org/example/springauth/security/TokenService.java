@@ -3,7 +3,7 @@ package org.example.springauth.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
-import org.example.springauth.usuario.Usuario;
+import org.example.springauth.applicationUser.ApplicationUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +17,13 @@ public class TokenService {
     @Value("${springauth.security.token.secret}")
     private String secret;
 
-    public String gerarToken(Usuario usuario) {
+    public String generateToken(ApplicationUser applicationUser) {
         try {
             var algoritmo = Algorithm.HMAC256(secret);
             return JWT.create()
                     .withIssuer("Auth API")
-                    .withSubject(usuario.getEmail())
-                    .withExpiresAt(dataExpiracao())
+                    .withSubject(applicationUser.getEmail())
+                    .withExpiresAt(expirationDate())
                     .sign(algoritmo);
         } catch (JWTCreationException exception){
             System.out.println("erro ao gerar token jwt");
@@ -46,7 +46,7 @@ public class TokenService {
 
     }
 
-    private Instant dataExpiracao() {
+    private Instant expirationDate() {
         return LocalDateTime.now().plusDays(4).toInstant(ZoneOffset.of("-03:00"));
     }
 

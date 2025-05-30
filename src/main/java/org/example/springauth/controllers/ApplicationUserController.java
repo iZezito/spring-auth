@@ -1,14 +1,13 @@
 package org.example.springauth.controllers;
 
 
-import org.example.springauth.model.UsuarioCreateDTO;
-import org.example.springauth.model.UsuarioDTO;
+import org.example.springauth.applicationUser.ApplicationUser;
+import org.example.springauth.model.ApplicationUserDTO;
 import org.example.springauth.model.auth.PasswordResetToken;
 import org.example.springauth.repository.TokenRepository;
 import org.example.springauth.service.EmailService;
 import org.example.springauth.service.EmailVerificationService;
-import org.example.springauth.usuario.Usuario;
-import org.example.springauth.usuario.UsuarioService;
+import org.example.springauth.applicationUser.ApplicationUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,11 +19,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/usuarios")
-public class UsuarioController {
+public class ApplicationUserController {
 
 
     @Autowired
-    private UsuarioService service;
+    private ApplicationUserService service;
 
     @Autowired
     private EmailService emailService;
@@ -36,52 +35,52 @@ public class UsuarioController {
     private EmailVerificationService emailVerificationService;
 
     @PostMapping
-    public ResponseEntity<String> insert(@RequestBody @Valid Usuario usuario){
-        Usuario user = service.save(usuario);
+    public ResponseEntity<String> insert(@RequestBody @Valid ApplicationUser applicationUser){
+        ApplicationUser user = service.save(applicationUser);
         StringBuilder builder = new StringBuilder();
-        String token = service.createVerificatioEmailToken(user);
-        emailService.sendEmail(user.getEmail(), "Verificação de Conta", builder.append("Clique no link para validar seu email: ").append("http://localhost:5173/validate-email?token=").append(token).toString());
-        return ResponseEntity.ok("Usuário registrado. Verifique seu e-mail para ativação.");
+        String token = service.createVerificationEmailToken(user);
+        emailService.sendEmail(user.getEmail(), "Account Verification", builder.append("Click on the link to validate your email: ").append("http://localhost:5173/validate-email?token=").append(token).toString());
+        return ResponseEntity.ok("Registered user. Check your email for activation.");
     }
 
     @GetMapping("/")
-    public ResponseEntity<UsuarioDTO> getUsuarioLogado(Authentication authentication) {
-        Usuario usuario = (Usuario) authentication.getPrincipal();
-        UsuarioDTO usuarioDTO = UsuarioDTO.convertToUsuarioDTO(usuario);
-        return ResponseEntity.ok(usuarioDTO);
+    public ResponseEntity<ApplicationUserDTO> getLoggedUser(Authentication authentication) {
+        ApplicationUser applicationUser = (ApplicationUser) authentication.getPrincipal();
+        ApplicationUserDTO applicationUserDTO = ApplicationUserDTO.convertToUserDTO(applicationUser);
+        return ResponseEntity.ok(applicationUserDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioDTO> update(@RequestBody UsuarioCreateDTO usuario,
-                                             @PathVariable Long id,
-                                             Authentication authentication) {
-        Usuario usuarioLogado = (Usuario) authentication.getPrincipal();
+    public ResponseEntity<ApplicationUserDTO> update(@RequestBody ApplicationUserDTO applicationUser,
+                                                     @PathVariable Long id,
+                                                     Authentication authentication) {
+        ApplicationUser applicationUserLogged = (ApplicationUser) authentication.getPrincipal();
 
-        if (!usuarioLogado.getId().equals(id)) {
+        if (!applicationUserLogged.getId().equals(id)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        Usuario usuarioBanco = service.getById(id);
-        if (usuarioBanco == null) {
+        ApplicationUser applicationUserBanco = service.getById(id);
+        if (applicationUserBanco == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        usuarioBanco.setNome(usuario.getNome());
-        usuarioBanco.setEmail(usuario.getEmail());
-        usuarioBanco.setTwoFactorAuthenticationEnabled(usuario.isTwoFactorAuthenticationEnabled());
+        applicationUserBanco.setName(applicationUser.getName());
+        applicationUserBanco.setEmail(applicationUser.getEmail());
+        applicationUserBanco.setTwoFactorAuthenticationEnabled(applicationUser.isTwoFactorAuthenticationEnabled());
 
-        service.update(usuarioBanco);
+        service.update(applicationUserBanco);
 
-        UsuarioDTO usuarioDTO = UsuarioDTO.convertToUsuarioDTO(usuarioBanco);
-        return ResponseEntity.ok(usuarioDTO);
+        ApplicationUserDTO applicationUserDTO = ApplicationUserDTO.convertToUserDTO(applicationUserBanco);
+        return ResponseEntity.ok(applicationUserDTO);
     }
 
     @GetMapping("/login/{login}")
     public Boolean login(@PathVariable String login){
-        Usuario usuarioBanco = service.findByLogin(login);
-        return usuarioBanco != null;
+        ApplicationUser applicationUserBanco = service.findByLogin(login);
+        return applicationUserBanco != null;
     }
 
     @GetMapping("/{id}")
-    public Usuario findById(@PathVariable Long id){
+    public ApplicationUser findById(@PathVariable Long id){
         return service.getById(id);
     }
 
@@ -99,12 +98,12 @@ public class UsuarioController {
 
     @PostMapping("/password-reset-tk")
     public ResponseEntity<String> requestPasswordReset(@RequestParam String email) {
-        Optional<Usuario> userOpt = Optional.ofNullable(service.findByLogin(email));
+        Optional<ApplicationUser> userOpt = Optional.ofNullable(service.findByLogin(email));
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
         }
         StringBuilder builder = new StringBuilder();
-        Usuario user = userOpt.get();
+        ApplicationUser user = userOpt.get();
         String token = service.createPasswordResetToken(user);
         emailService.sendEmail(user.getEmail(), "Redefinição de senha", builder.append("Clique no link para redefinir sua senha: ").append("http://localhost:5173/reset-password?token=").append(token).toString());
 
@@ -118,7 +117,7 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido ou expirado.");
         }
 
-        Usuario user = resetTokenOpt.get().getUser();
+        ApplicationUser user = resetTokenOpt.get().getUser();
         service.updatePassword(user, newPassword);
         tokenRepository.delete(resetTokenOpt.get());
 

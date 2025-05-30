@@ -1,8 +1,8 @@
 package org.example.springauth.service;
 
+import org.example.springauth.applicationUser.ApplicationUser;
 import org.example.springauth.model.auth.TwoFactorAuthentication;
 import org.example.springauth.repository.TwoFactorAuthenticationRepository;
-import org.example.springauth.usuario.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,24 +20,24 @@ public class TwoFactorAuthService {
 
     private static final int CODE_EXPIRATION_MINUTES = 120;
 
-    public void generateAndSend2FACode(Usuario usuario) {
-        TwoFactorAuthentication twoFactorAuthentication = twoFactorAuthRepository.findByUsuario(usuario);
+    public void generateAndSend2FACode(ApplicationUser applicationUser) {
+        TwoFactorAuthentication twoFactorAuthentication = twoFactorAuthRepository.findByApplicationUser(applicationUser);
         if(twoFactorAuthentication != null) twoFactorAuthRepository.delete(twoFactorAuthentication);
         String code = generateRandomCode();
 
         TwoFactorAuthentication twoFactorAuth = new TwoFactorAuthentication();
-        twoFactorAuth.setUsuario(usuario);
+        twoFactorAuth.setApplicationUser(applicationUser);
         twoFactorAuth.setCode(code);
         twoFactorAuth.setExpiryDate(LocalDateTime.now().plusMinutes(CODE_EXPIRATION_MINUTES));
 
         twoFactorAuthRepository.save(twoFactorAuth);
 
-        String message = "Seu código de autenticação de dois fatores é: " + code;
-        emailService.sendEmail(usuario.getEmail(), "Código de Autenticação de Dois Fatores", message);
+        String message = "Your two-factor authentication code is: " + code;
+        emailService.sendEmail(applicationUser.getEmail(), "Two-Factor Authentication Code", message);
     }
 
-    public boolean validate2FACode(Usuario usuario, String code) {
-        TwoFactorAuthentication twoFactorAuth = twoFactorAuthRepository.findByUsuario(usuario);
+    public boolean validate2FACode(ApplicationUser applicationUser, String code) {
+        TwoFactorAuthentication twoFactorAuth = twoFactorAuthRepository.findByApplicationUser(applicationUser);
 
         boolean valid = twoFactorAuth != null &&
                 twoFactorAuth.getCode().equals(code) &&

@@ -1,7 +1,7 @@
 package org.example.springauth.security;
 
 
-import org.example.springauth.usuario.UsuarioRepository;
+import org.example.springauth.applicationUser.ApplicationUserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +20,7 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Autowired
     private TokenService TokenService;
     @Autowired
-    private UsuarioRepository repository;
+    private ApplicationUserRepository repository;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         System.out.println("Chegou no filtro");
